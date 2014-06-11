@@ -3244,7 +3244,7 @@ Class DataGrid
                         if(function_exists($field_property_on_item_created)){
                             //ini_set("allow_call_time_pass_reference", true); 
                             //$curr_value = str_replace(",", "", $field_property_on_item_created($row[$c])); // ORIGINAL LINE
-                            $curr_value = str_replace(",", "", $field_property_on_item_created($row[$c]), $r); // ALLOW PASSING THE ROW ID INTO FUNCTION
+                            $curr_value = str_replace(",", "", $field_property_on_item_created($row[$c], $row)); // ALLOW PASSING THE ROW ID INTO FUNCTION
                         }else{
                             $curr_value = str_replace(",", "", $row[$c]);
                         }
@@ -5212,8 +5212,8 @@ Class DataGrid
                 // customized working with field value
                 if(function_exists($field_property_on_item_created)){
                     //ini_set("allow_call_time_pass_reference", true); 
-                    $field_value = $field_property_on_item_created($field_value); // ORIGINAL LINE
-                    //$field_value = $field_property_on_item_created($field_value, $ind, $row); // MODIFIED TO ALLOW DIFFERENT ROW COLORS
+                    //$field_value = $field_property_on_item_created($field_value); // ORIGINAL LINE
+                    $field_value = $field_property_on_item_created($field_value,  $row, $ind); // MODIFIED TO ALLOW DIFFERENT ROW COLORS
                 }
                 
                 $title = "";
