@@ -2294,19 +2294,8 @@ Class DataGrid
             }
             if($this->printing_allowed){
                 if(($req_export == "") && ($req_print != true)){
-                    
-echo "<td align='right' style='width: 20px;'><a style='cursor:pointer;' onClick=\"".$myRef_window."=window.open(''+self.location+'".(($_SERVER['QUERY_STRING'] == "")?"?":"&").$this->uniquePrefix."print=true','PrintableView','left=20,top=20,width=840,height=630,toolbar=0,menubar=0,resizable=0,location=0,scrollbars=1');".$myRef_window.".focus()\" class='".$this->css_class."_dg_a'><img src='".$this->directory."images/".$this->css_class."/print_b.gif' onmouseover='this.src=\"".$this->directory."images/".$this->css_class."/print_r.gif\"' onmouseout='this.src=\"".$this->directory."images/".$this->css_class."/print_b.gif\"' alt='".$this->lang['printable_view']."' title='".$this->lang['printable_view']."'></a></td>";
-                
-
-
-
-
-
-
-
-
-
-	else{
+                    echo "<td align='right' style='width: 20px;'><a style='cursor:pointer;' onClick=\"".$myRef_window."=window.open(''+self.location+'".(($_SERVER['QUERY_STRING'] == "")?"?":"&").$this->uniquePrefix."print=true','PrintableView','left=20,top=20,width=840,height=630,toolbar=0,menubar=0,resizable=0,location=0,scrollbars=1');".$myRef_window.".focus()\" class='".$this->css_class."_dg_a'><img src='".$this->directory."images/".$this->css_class."/print_b.gif' onmouseover='this.src=\"".$this->directory."images/".$this->css_class."/print_r.gif\"' onmouseout='this.src=\"".$this->directory."images/".$this->css_class."/print_b.gif\"' alt='".$this->lang['printable_view']."' title='".$this->lang['printable_view']."'></a></td>";
+                }else{
                     echo "<td align='right'><a style='cursor:pointer; ' onClick='window:print();' class='".$this->css_class."_dg_a no_print'  title='".$this->lang['print_now_title']."'>".$this->lang['print_now']."</a></td>";
                 }
             }
@@ -4949,11 +4938,11 @@ echo "<td align='right' style='width: 20px;'><a style='cursor:pointer;' onClick=
     protected function SetUrlStringSorting(&$curr_url, $amp=""){
         $amp = ($amp != "") ? $amp : $this->amp;
         $sort_field = $this->GetVariable('sort_field');
-
-//	echo '<h1>SORT FIELD: '. $sort_field .'</h1>';	
+        
+	// tweeking sort by that gets screwed up and drops the second sorting field
 	if ($sort_field == 'priority') $sort_field = 'priority,status';
 
-        $sort_field_by = $this->GetVariable('sort_field_by');
+	$sort_field_by = $this->GetVariable('sort_field_by');
         $sort_field_type = $this->GetVariable('sort_field_type');
         $sort_type = $this->GetVariable('sort_type');                
         if(isset($this->default_sort_field_help )) { $this->default_sort_field[0] = $this->default_sort_field_help; }
