@@ -46,7 +46,7 @@ LEFT JOIN project_notes ON lastProjectComment.lastCommentId = project_notes.note
       $unique_prefix = "f_";  
       $dgrid = new DataGrid($debug_mode, $messaging, $unique_prefix, DATAGRID_DIR);
     ##  *** set data source with needed options
-      $default_order_field = "priority, status";
+      $default_order_field = "priority,status";
       $default_order_type = "ASC";
       $dgrid->dataSource($db_conn, $sql, $default_order_field, $default_order_type);	    
     
@@ -104,7 +104,7 @@ $dgrid->SetHttpGetVars($http_get_vars);
 	$filtering_option = false;
 ##  *** filter layouts: "0" - tabular(horizontal) - default, "1" - columnar(vertical), "2" - advanced(inline)
 //$layouts = array("view"=>"0", "edit"=>"1", "details"=>"1", "filter"=>"2"); 
-$show_search_type = false;
+$show_search_type = true;
 	$dgrid->AllowFiltering($filtering_option, $show_search_type);
 	
 	// arrays to build dropdowns or radio buttons.
@@ -531,7 +531,7 @@ function set_row_color_for_priority($field_value, $r, $index)
 
 	// if there are no notes entered yet, add this so there is something to click on to get to the notes screen.
 	if (trim($r[8]) == '' && $index == 8)
-		$field_value = 'Click Enter Progress Notes';
+		$field_value = 'Click To Enter Progress Notes';
 
 	//echo print_r($r,true) . 'index: ' . $index;	
 	

@@ -2245,6 +2245,18 @@ Class DataGrid
                 echo "<label class='".$this->css_class."_dg_label'>".$this->lang['required_fields_msg']."</label>";
             }else{
                 echo $this->navigationBar;
+
+		// IF THIS IS THE PROJECT MANAGEMENT DATAGRID, SHOW THESE FILTER LINKS..
+		if ($_GET['q'] == 'node/1')
+		{
+			echo '<div align=center>';
+			$sorting_link = 'http://kedesigns-pm.eweaversolutions.com/?q=node%2F1&f_page_size=50&f_sort_field=priority,status&f_sort_field_by=&f_sort_field_type=&f_sort_type=&f__ff_projects_status_operator=like&f__ff_onSUBMIT_FILTER=Search&f__ff_projects_status=';
+			echo '[<a href="'.$sorting_link.'">--Show All--</a>] ';
+			echo '[<a href="'.$sorting_link.'1,2,3">--Show All But Complete--</a>] ';
+			echo '[<a href="'.$sorting_link.'3">--Only Bids/Estimates--</a>] ';
+			echo '[<a href="'.$sorting_link.'4">--Only Complete--</a>] ';
+			echo '</div>';
+		} // end if $_GET['Q'] == node/1
             }
             echo "</td>";        
             if($this->filtering_allowed && (($this->mode != "edit") && ($this->mode != "details"))){
