@@ -46,7 +46,7 @@ LEFT JOIN project_notes ON lastProjectComment.lastCommentId = project_notes.note
       $unique_prefix = "f_";  
       $dgrid = new DataGrid($debug_mode, $messaging, $unique_prefix, DATAGRID_DIR);
     ##  *** set data source with needed options
-      $default_order_field = "priority";
+      $default_order_field = "priority, status";
       $default_order_type = "ASC";
       $dgrid->dataSource($db_conn, $sql, $default_order_field, $default_order_type);	    
     
@@ -63,7 +63,7 @@ LEFT JOIN project_notes ON lastProjectComment.lastCommentId = project_notes.note
 		  "edit"    =>array("view"=>true, "edit"=>true, "type"=>"link",  "byFieldValue"=>""),
 		  "cancel"  =>array("view"=>true, "edit"=>true, "type"=>"link"),
 		  //"details" =>array("view"=>true, "edit"=>false, "type"=>"link"),
-		  "delete"  =>array("view"=>true, "edit"=>true, "type"=>"image")
+		  "delete"  =>array("view"=>false, "edit"=>true, "type"=>"image")
 		  
 	);	
 		
@@ -101,7 +101,7 @@ $dgrid->SetHttpGetVars($http_get_vars);
     ## | 5. Filtering Settings:  (search)                                          | 
     ## +---------------------------------------------------------------------------+
 	
-	$filtering_option = true;
+	$filtering_option = false;
 ##  *** filter layouts: "0" - tabular(horizontal) - default, "1" - columnar(vertical), "2" - advanced(inline)
 //$layouts = array("view"=>"0", "edit"=>"1", "details"=>"1", "filter"=>"2"); 
 $show_search_type = false;
@@ -110,17 +110,16 @@ $show_search_type = false;
 	// arrays to build dropdowns or radio buttons.
 	$translate_boolean = array(0=>"No", 1=>"Yes");
 	
-	$priority_field_dropdown_options = array("1"=>"Todays Tasks", "2"=>"Requires Attention", "3"=> "Requires No Attention", "4"=>"Waiting");  /* as "value"=>"option" */
-	//..................
-	// this code builds the dependent dropdown country-state
+	$priority_field_dropdown_options = array("1"=>"Today's Tasks", "2"=>"Requires Attention", "3"=> "Requires No Attention", "4"=>"Waiting");  /* as "value"=>"option" */
 
-	// create the state filter condition..
+	$cabinetry_field_dropdown_options = array("?"=>"?","CC-C"=>"CC-C","CC-M"=>"CC-M","CC-K"=>"CC-K","CC-N"=>"CC-N","CC-CP"=>"CC-CP","WP"=>"WP","MC"=>"MC","SM"=>"SM");
+	
+	$status_field_dropdown_options = array("1"=>"Active","2"=>"On Order","3"=>"Bid/Estimate", "4"=> "Complete");  /* as "value"=>"option" */
+
 
 	
 	//................................................	
 		
-	//..............
-	
 	$filtering_fields = array(
 	
 
@@ -130,11 +129,12 @@ $show_search_type = false;
 			"table"=>"projects",
 			"field"=>"status",
 			"filter_condition"=>"",
-			"show_operator"=>false,
+			"show_operator"=>true,
 			"default_operator"=>"like",
 			"case_sensitive"=>false,
 			"comparison_type"=>"string",
 			"width"=>"",
+			"multiple"=>"false",
 			"on_js_event"=>""),
 								
 	);
@@ -191,6 +191,7 @@ $vm_columns = array(
     	"status"  =>array("header"=>"Status", 
 				  		"type"=>"label",    
 						"req_type"=>"rt", 
+						"align"=>"center",
 						//"width"=>"210px", 
 						"title"=>"", 
 						"readonly"=>"false", 
@@ -204,7 +205,7 @@ $vm_columns = array(
   	
 		
     
-		"project_type"  =>array("header"=>"Project Type", 
+		"project_type"  =>array("header"=>"Proj Type", 
 				  		"type"=>"label",    
 						"req_type"=>"rt", 
 						//"width"=>"210px", 
@@ -221,7 +222,7 @@ $vm_columns = array(
     	
 										
 
-    	"description"  =>array("header"=>"Description/PO", 				
+    	"description"  =>array("header"=>"Desc/PO", 				
                 				"type"=>"label",
                                                 "field_key"=>"project_id",
                                                 "field_data"=>"project_id",
@@ -233,21 +234,23 @@ $vm_columns = array(
                                                 "href"=>"http://kedesigns-pm.eweaversolutions.com/?q=node/1&project_id={0}"),
 
        "dropbox_icon"  =>array("header"=>" ",
-                                                "type"=>"label",
-                                                "field_key"=>"project_id",
-                                                "field_data"=>"project_id",
+                                                "type"=>"link",
+                                                "field_key"=>"po_url",
+						"align"=>"center",
+                                                "field_data"=>"po_url",
                                                 //"on_item_created"=>"set_row_color_for_priority",
 
                                         //      "rel"=>"", 
-                                              	"tooltip"=>"Dropbox Files",
+                                              	//"tooltip"=>"Dropbox Files",
                                               	"target"=>"_blank", 
-                                                "href"=>"http://kedesigns-pm.eweaversolutions.com/?q=node/1&project_id={0}"),
+                                                "href"=>"{0}"),
 
 
 
-    	"cabinetry"  =>array("header"=>"Cabinetry", 
+    	"cabinetry"  =>array("header"=>"Cab", 
 				  		"type"=>"label",    
 						"req_type"=>"rt", 
+						"align"=>"center",
 						//"width"=>"210px", 
 						"title"=>"", 
 						"readonly"=>"false", 
@@ -259,10 +262,10 @@ $vm_columns = array(
 						"visible"=>"true", 
 						"on_js_event"=>""),					
 
-    	"progress_notes"  =>array("header"=>"Progress Notes", 
+    	"progress_notes"  =>array("header"=>"Last Progress Note", 
 				  		"type"=>"label",    
 						"req_type"=>"rt", 
-						//"width"=>"210px", 
+						"width"=>"100%", 
 						"title"=>"", 
 						"readonly"=>"false", 
 						"maxlength"=>"-1", 
@@ -297,7 +300,7 @@ $vm_columns = array(
                                                 "on_js_event"=>""),   
 
 
-        "deposit_translated"  =>array("header"=>"Deposit?",
+        "deposit_translated"  =>array("header"=>"Dep?",
                                                 "type"=>"label",
 						"align"=>"center",
                                                 "req_type"=>"rt",
@@ -312,7 +315,7 @@ $vm_columns = array(
                                                 "visible"=>"true",
                                                 "on_js_event"=>""),   
 
-        "final_translated"  =>array("header"=>"Final?",
+        "final_translated"  =>array("header"=>"Fin?",
                                                 "type"=>"label",
                                                 "align"=>"center",
 						"req_type"=>"rt",
@@ -338,7 +341,7 @@ $vm_columns = array(
                                                 "unique"=>"false",
                                                 "unique_condition"=>"",
                                                 "align"=>"center",
-						"visible"=>"true", 
+						"visible"=>"false", 
                                                 "on_item_created"=>"set_row_color_for_priority",
                                                 "on_js_event"=>""),
 
@@ -354,8 +357,6 @@ $vm_columns = array(
     ## +---------------------------------------------------------------------------+
     ##  ***  set settings for edit/details mode
     
-	##  preedfiled values:	
-	$status_field_dropdown_options = array("Active"=>"Active", "Bid/Estimate"=>"Bid/Estimate", "Complete"=> "Complete");  /* as "value"=>"option" */
 	
 	$em_columns = array(	
 	
@@ -432,7 +433,9 @@ $vm_columns = array(
 						"on_js_event"=>""),
 					
     	"cabinetry"  =>array("header"=>"Cabinetry", 
-				  		"type"=>"textbox",    
+						
+						"source"=>$cabinetry_field_dropdown_options,
+				  		"type"=>"enum",    
 						"req_type"=>"st", 
 						//"width"=>"210px", 
 						"title"=>"", 
@@ -443,12 +446,12 @@ $vm_columns = array(
 						"unique_condition"=>"", 
 						"visible"=>"true", 
 						"on_js_event"=>""),		
-/*						
-    	"progress_notes"  =>array("header"=>"Progress Notes", 
+						
+    	"po_url"  =>array("header"=>"Dropbox URL", 
 				  		"type"=>"textbox",    
 						"req_type"=>"st", 
 						"width"=>"100%", 
-						"title"=>"", 
+						"title"=>"Find this link in Dropbox by selecting Share Link on the appropriate folder", 
 						"readonly"=>"false", 
 						"maxlength"=>"-1", 
 						"default"=>"", 
@@ -456,7 +459,7 @@ $vm_columns = array(
 						"unique_condition"=>"", 
 						"visible"=>"true", 
 						"on_js_event"=>""),												
-*/						
+						
     	"qb"  =>array("header"=>"QB?", 
 				  		"type"=>"checkbox",    
 						"req_type"=>"st", 
@@ -525,22 +528,33 @@ function set_row_color_for_priority($field_value, $r, $index)
         global $global_code;
 	$priority = $r[3];
 
-	
+
+	// if there are no notes entered yet, add this so there is something to click on to get to the notes screen.
 	if (trim($r[8]) == '' && $index == 8)
-		$field_value = 'Enter Progress Notes';
+		$field_value = 'Click Enter Progress Notes';
+
+	//echo print_r($r,true) . 'index: ' . $index;	
 	
-	// translate the priority number 
-	//if ($r[3] == 1 && $index == 3)
- //		$field_value = "Todays Tasks";
+	//...................................
+	// translate the status number
 	
-//	else if ($r[3] == 2 && $index == 3)
-//	{
-//		$field_value = "Requires Attention"
-//	 "3"=> "Requires No Attention", "4"=>"Waiting");  /* as "value"=>"option" */
-//	}
-//	else if ($r[3] == 3 && $index == 3)
-//	{
-//}
+	if ($r[2] == 1 && $index == 2)
+	{
+ 		$field_value = "Active";
+	}
+	else if ($r[2] == 2 && $index == 2)
+	{
+		$field_value = "On Order";
+	}
+	else if ($r[2] == 3 && $index == 2)
+	{
+		$field_value = "Bid/Estimate";	
+	}
+	else if ($r[2] == 4 && $index == 2)
+	{
+		$field_value = "Complete";
+	}
+
 
 	//echo 'set_row_color_for_priority function got fired; priority='.$priority . '; ind=' . $index . '; row=' . $r;
 	//echo print_r($r, true);

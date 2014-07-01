@@ -24,11 +24,6 @@
 
 	$project_sql = "SELECT * FROM projects where project_id = " . $project_id;
 
-
-
-
-
-
 	
 	include ('creds.php');
     
@@ -37,8 +32,8 @@
       $db_conn -> connect(DB::parseDSN('mysql://'.$DB_USER.':'.$DB_PASS.'@'.$DB_HOST.'/'.$DB_NAME));
     
     ##  *** put a primary key on the first place 
-      $sql=" SELECT note_id, project_id, note  FROM project_notes where project_id = " . $project_id;
-       
+      $sql=" SELECT note_id, project_id, DATE_FORMAT(time_stamp,'%c-%e-%Y' ) AS time_stamp, note  FROM project_notes where project_id = " . $project_id;
+      //%c/%e/%Y 
     ##  *** set needed options
       $debug_mode = false;
       $messaging = true;
@@ -56,27 +51,84 @@ $project_sql = "SELECT * FROM projects where project_id = " . $project_id;
 $dSet = $dgrid->ExecuteSql($project_sql);
 
 $row = $dSet->fetchRow(); 
+//***************************************
+
+       // arrays to build dropdowns or radio buttons.
+$translate_boolean = array(0=>"No", 1=>"Yes");
+$priority_field_dropdown_options = array("1"=>"Today's Tasks", "2"=>"Requires Attention", "3"=> "Requires No Attention", "4"=>"Waiting");  /* as "value"=>"option" */
+
+//echo print_r($priority_field_dropdown_options, true);
+//echo "<br>";
+//ho "1: " . $priority_field_dropdown_options[1];
+
+
+function translate_status($status)
+{
+	if ($status == 1)
+		return "Active";
+
+	if ($status == 2)
+		return "On Order";
+
+	if ($status == 3)
+		return "Bid/Estimate";
+
+	if ($status == 4)
+		return "Complete";
+} // end function translate_status()
+
+function translate_priority($priority)
+{
+
+ 	if ($priority == 1)
+		return "<font color=red>Today's Tasks</font>";
+
+	if ($priority == 2)
+		return "<font color=orange>Requires Attention</font>";
+
+	if ($priority == 3)	
+		return "<font color=green>Requires No Attention</font>";
+
+	if ($priority == 4)
+		return "Waiting";
+
+	return priority;
+} // end function translate_priority()
+
+function translate_boolean($yes_no)
+{
+	if ($yes_no == 1)
+		return 'YES';
+
+	if ($yes_no == 0)
+		return 'NO';
+
+	return $yes_no;
+}// end function translate_boolean()
+
+
 //echo 'Project ID: '.$row[0].'<br>';	 
 echo '<h2>Client: '.$row[1].'</h2>';
+echo '[<a href=http://kedesigns-pm.eweaversolutions.com/?q=node/1&f_mode=edit&f_rid='.$project_id.'&project_id='.$project_id.' >Edit Project Details</a>]';
 
 echo '<table>';
 echo '<tr><th width=15%>Description: </th><td>'.$row[5].'</td></tr>';
 
 echo '<tr><th width=15%>Project Type: </th><td>'.$row[4].'</td></tr>';
 echo '<tr><th width=15%>Cabinetry:</th><td> '.$row[7].'</td></tr>';
-echo '<tr><th width=15%>Dropbox URL:</th><td> '.$row[6].'</td></tr>';
-echo '<tr><th width=15%>Status:</th><td> '.$row[2].'</td></tr>';
-echo '<tr><th>Priority:</th><td> '.$row[3].'</td></tr>';
+echo '<tr><th width=15%>Dropbox URL:</th><td><a target=_blank href="'.$row[6].'"> '.$row[6].'</a></td></tr>';
+echo '<tr><th width=15%>Status:</th><td> '. translate_status($row[2]) .'</td></tr>';
+echo '<tr><th>Priority:</th><td> '. translate_priority($row[3]).'</td></tr>';
 
 echo '</table>';
 //echo 'Last Progress Note: '.$row[8].'<br>';
-echo 'QB?: '.$row[9].' ';
-echo 'Deposit?: '.$row[10].' ';
-echo 'Final:? '.$row[11].' ';
+echo '(QB? '. translate_boolean($row[9]).') ';
+echo '~~ (Deposit? '.translate_boolean($row[10]).') ';
+echo '~~ (Final? '.translate_boolean($row[11]).') ';
 echo '<hr>';
 
-	echo '<a href=http://kedesigns-pm.eweaversolutions.com/?q=node/1><< Back to Project Dashboard</a>';
-
+echo '<a href=http://kedesigns-pm.eweaversolutions.com/?q=node/1><< Back to Project Dashboard</a>';
+// f_sort_field=priority,status
 
 
 
@@ -206,11 +258,27 @@ $vm_columns = array(
                                                 "unique_condition"=>"",
                                                 "visible"=>"false",  // NOT VISIBLE
                                                 "on_js_event"=>""),
-    
+   
+
+  "time_stamp"  =>array(     "header"=>"Date Entered",
+                                                "type"=>"label",
+                                                "req_type"=>"rt",
+                                                //"width"=>"15%", 
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>"",
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",  // NOT VISIBLE
+                                                "on_js_event"=>""),
+
+
+ 
     	"note"  =>array("header"=>"Progress Notes", 
 				  		"type"=>"label",    
 						"req_type"=>"rt", 
-						//"width"=>"210px", 
+						"width"=>"100%", 
 						"title"=>"", 
 						"readonly"=>"false", 
 						"maxlength"=>"-1", 
@@ -240,7 +308,7 @@ $vm_columns = array(
 	$project_id_arr = array($project_id=>$project_id);
 
 	$em_columns = array(																																				
-		"project_id"  =>array("header"=>"project_id", 
+		"project_id"  =>array("header"=>"Project ID", 
 				  		"type"=>"textbox",    
 						"req_type"=>"st", 
 						//"width"=>"210px", 
@@ -253,6 +321,18 @@ $vm_columns = array(
 						"default"=>$project_id, 
 						"on_js_event"=>""),
 					
+           "time_stamp"  =>array("header"=>"Time Stamp",
+                                                "type"=>"textbox",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"",
+                                                "readonly"=>"true",
+                                                "maxlength"=>"-1",
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"false",
+                                                "default"=> date("Y-m-d H:i:s"),
+                                                "on_js_event"=>""),
 						
     	"note"  =>array("header"=>"Progress Notes", 
 				  		"type"=>"textbox",    
@@ -339,7 +419,18 @@ $pid = (isset($_REQUEST[$unique_prefix.'pid'])) ? $_REQUEST[$unique_prefix.'pid'
 //echo 'pid:'. $pid . '<br>';
 //echo 'dgrid:' . print_r($dgrid, true) . '<br>';
 
-//////////////////////////////////////////////////////
+   // get the values that were just inserted.
+   //$sql_select = 'SELECT * from project_notes where note_id = ' . $dgrid->rid;
+   //$dSet = $dgrid->ExecuteSql($sql_select);
+   //$row = $dSet->fetchRow();
+
+//echo print_r($row,true)  . '<br>';
+//echo '<br>today:' . date('m-d-Y');
+//echo '<br>date:' . date('m-d-Y', strtotime($row[2]));
+
+
+
+/////////////////////////////////////////////////////
 // AFTER AN ADD, DO THE FOLLOWING ADDITIONAL TASKS:
 if(($mode == "update") && ($rid == "-1") && $dgrid->IsOperationCompleted()){
 	
@@ -348,8 +439,11 @@ if(($mode == "update") && ($rid == "-1") && $dgrid->IsOperationCompleted()){
    $dSet = $dgrid->ExecuteSql($sql_select);
    $row = $dSet->fetchRow();
 
+   // format the datetime:
+   $this_date = date('n-j-Y', strtotime($row[2]));
+
    // update the project record
-   $sql_update = "UPDATE projects SET progress_notes = '".$row[2]."' WHERE project_id = ".$row[1];  
+   $sql_update = "UPDATE projects SET progress_notes = '<b>" .$this_date. ":</b> " .$row[3]. "' WHERE project_id = ".$row[1];  
    $dSet = $dgrid->ExecuteSql($sql_update);
    //echo 'sql_update: '. $sql_update;	
 }
@@ -364,7 +458,11 @@ if(($mode == "update") && ($rid != "-1") && $dgrid->IsOperationCompleted()){
    $updated_row = $dSet->fetchRow();
    //echo print_r($updated_row, true);
 
-   // get the most recently added note.. .maybe this isnt what was just updated..
+
+   // format the datetime
+   $this_date = date('n-j-Y', strtotime($updated_row[2]));
+   
+// get the most recently added note.. .maybe this isnt what was just updated..
    $sql_select = 'SELECT max(note_id) from project_notes where project_id = ' . $updated_row[1];
    $dSet = $dgrid->ExecuteSql($sql_select);
    $last_row = $dSet->fetchRow();
@@ -373,7 +471,7 @@ if(($mode == "update") && ($rid != "-1") && $dgrid->IsOperationCompleted()){
    if ($updated_row[0] == $last_row[0])
    {
       // update the project record
-      $sql_update = "UPDATE projects SET progress_notes = '".$updated_row[2]."' WHERE project_id = ".$updated_row[1];
+      $sql_update = "UPDATE projects SET progress_notes = '<b>" .$this_date. ":</b> " .$updated_row[3]. "' WHERE project_id = ".$updated_row[1];
       $dSet = $dgrid->ExecuteSql($sql_update);
       //echo 'sql_update: '. $sql_update;  
 
