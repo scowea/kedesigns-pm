@@ -364,7 +364,7 @@ $vm_columns = array(
 	
 		
 								
-    	"client"  =>array("header"=>"Client", 
+    	"client"  =>array("header"=>"Client:", 
 				  		"type"=>"textbox",    
 						"req_type"=>"rt", 
 						//"width"=>"210px", 
@@ -377,7 +377,7 @@ $vm_columns = array(
 						"visible"=>"true",
 						"on_js_event"=>""),								
 																																			
-    	"status"  =>array("header"=>"Status", 
+    	"status"  =>array("header"=>"Status:", 
 				  		"type"=>"enum",    
 						"req_type"=>"st", 
 						//"width"=>"210px", 
@@ -392,7 +392,7 @@ $vm_columns = array(
 						"on_js_event"=>""),
 		
 		
-    	"priority"  =>array("header"=>"Priority", 
+    	"priority"  =>array("header"=>"Priority:", 
 				  		"type"=>"enum",    
 						"req_type"=>"st", 
 						//"width"=>"210px", 
@@ -406,7 +406,7 @@ $vm_columns = array(
 						"source"=>$priority_field_dropdown_options,
 						"on_js_event"=>""),
 						
-    	"project_type"  =>array("header"=>"Project Type", 
+    	"project_type"  =>array("header"=>"Project Type:", 
 				  		"type"=>"textbox",    
 						"req_type"=>"st", 
 						//"width"=>"210px", 
@@ -419,7 +419,7 @@ $vm_columns = array(
 						"visible"=>"true", 
 						"on_js_event"=>""),
 						
-		"description"  =>array("header"=>"Description/PO", 
+		"description"  =>array("header"=>"Description/PO:", 
 				  		"type"=>"textbox",    
 						"req_type"=>"st", 
 						//"width"=>"210px", 
@@ -432,7 +432,7 @@ $vm_columns = array(
 						"visible"=>"true", 
 						"on_js_event"=>""),
 					
-    	"cabinetry"  =>array("header"=>"Cabinetry", 
+    	"cabinetry"  =>array("header"=>"Cabinetry:", 
 						
 						"source"=>$cabinetry_field_dropdown_options,
 				  		"type"=>"enum",    
@@ -447,7 +447,7 @@ $vm_columns = array(
 						"visible"=>"true", 
 						"on_js_event"=>""),		
 						
-    	"po_url"  =>array("header"=>"Dropbox URL", 
+    	"po_url"  =>array("header"=>"Dropbox URL:", 
 				  		"type"=>"textbox",    
 						"req_type"=>"st", 
 						"width"=>"100%", 
@@ -509,6 +509,33 @@ $vm_columns = array(
 
 						
 	); // end $em_columns = array(
+
+	$this_mode = isset($_REQUEST['f_mode']) ? $_REQUEST['f_mode'] : "";
+
+	//echo '<h1>mode:'. $this_mode . '</h1>';
+
+	if ($this_mode == 'add')
+	{
+	
+		//$todays_date = 'TODAY: ';
+			$em_columns['progress_notes']  = array("header"=>"Initial Progress Note:",
+                                                "type"=>"textbox", 
+                                                "req_type"=>"rt",
+                                                "width"=>"100%", 
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1", 
+                                                "default"=>"", 
+                                                "unique"=>"false", 
+                                                "unique_condition"=>"",
+                                                "visible"=>"true", 
+                                                "on_js_event"=>"");
+
+		//echo '<H1>MODE == ADD</H1>';
+	
+	} // end if ($this_mode == 'add')		
+
+	//echo '<pre>'.	print_r($em_columns, true) . '</pre>';
 
 	//$auto_column_in_edit_mode =true;
 	//$dgrid->SetAutoColumnsInEditMode($auto_column_in_edit_mode);
@@ -588,6 +615,9 @@ function set_row_color_for_priority($field_value, $r, $index)
 //echo 'GLOBAL CODE IS HERE: '. $global_code;
 
 
+$mode = (isset($_REQUEST[$unique_prefix.'mode'])) ? $_REQUEST[$unique_prefix.'mode'] : '';
+$rid = (isset($_REQUEST[$unique_prefix.'rid'])) ? $_REQUEST[$unique_prefix.'rid'] : '';
+$pid = (isset($_REQUEST[$unique_prefix.'pid'])) ? $_REQUEST[$unique_prefix.'pid'] : '';
 
 
 
@@ -601,5 +631,45 @@ function set_row_color_for_priority($field_value, $r, $index)
         $dgrid->bind();        
         //ob_end_flush();
     ################################################################################    
+
+function safe($value){
+   return mysql_real_escape_string($value);
+}  
+
+
+/////////////////////////////////////////////////////
+// AFTER AN ADD, DO THE FOLLOWING ADDITIONAL TASKS:
+if(($mode == "update") && ($rid == "-1") && $dgrid->IsOperationCompleted()){
+
+   	// get the values that were just inserted.
+   	$sql_select = 'SELECT * from projects where project_id = ' . $dgrid->rid;
+   	$dSet = $dgrid->ExecuteSql($sql_select);
+   	$row = $dSet->fetchRow();
+	$this_progress_note = $row[8];
+	$this_date = date('n-j-Y');
+	$this_timestamp = date("Y-m-d H:i:s");
+	$this_project_id = $row[0];
+
+	//echo '<pre>' . print_r($row, true) . '</pre>';
+   	//$new_sql_update = 'UPDATE projects ' . $sql_set . ' WHERE project_id = ' . $this_project_id;
+   	//echo 'NEW SQL:' .  $new_sql_update; 
+        
+   	// update the project record so the "last progress note" has a time stamp..
+   	$sql_update = "UPDATE projects SET progress_notes = '<b>" .$this_date. ":</b> " .$this_progress_note. "' WHERE project_id = ".$this_project_id;  
+	$dSet = $dgrid->ExecuteSql($sql_update); 
+
+       	// now add a new note record...
+	$sql_insert = 'INSERT INTO project_notes (project_id, time_stamp, note) VALUES("'.$this_project_id.'","'.$this_timestamp.'","'.$this_progress_note.'")';
+	$dSet = $dgrid->ExecuteSql($sql_insert); 
+	//echo $sql_insert;	
+	
+
+   	// refresh the page so the project details/info at the top reflects the new changed values..
+   	echo '<meta http-equiv="refresh" content="2;url=http://kedesigns-pm.eweaversolutions.com/?q=node/1">';
+
+	
+
+
+}
 
 ?>

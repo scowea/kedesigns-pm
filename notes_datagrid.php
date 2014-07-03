@@ -354,7 +354,7 @@ $vm_columns = array(
 	//.................................
 	// virtual fields..					
 
-/*
+
    "client__nc"  =>array("header"=>"Client",
                                                 "type"=>"textbox",
                                                 "req_type"=>"rt", 
@@ -424,6 +424,8 @@ $vm_columns = array(
                                                 "visible"=>"true",
                                                 "on_js_event"=>""),
 
+
+
         "cabinetry__nc"  =>array("header"=>"Cabinetry",
 
                                                 "source"=>$cabinetry_field_dropdown_options,
@@ -452,8 +454,10 @@ $vm_columns = array(
                                                 "visible"=>"true",
                                                 "on_js_event"=>""),                          
 
+
         "qb__nc"  =>array("header"=>"QB?",
-                                                "type"=>"checkbox",
+                                                "type"=>"enum",
+						"source"=>$translate_boolean,
                                                 "req_type"=>"st",
                                                 //"width"=>"210px", 
                                                 "title"=>"",
@@ -470,7 +474,8 @@ $vm_columns = array(
 
 
         "deposit__nc"  =>array("header"=>"Deposit?",
-                                                "type"=>"checkbox",
+                                                "type"=>"enum",
+						"source"=>$translate_boolean,
                                                 "req_type"=>"st",
                                                 //"width"=>"210px", 
                                                 "title"=>"",
@@ -485,7 +490,8 @@ $vm_columns = array(
                                                 "on_js_event"=>""),
 
         "final__nc"  =>array("header"=>"Final?",
-                                                "type"=>"checkbox",
+                                                "type"=>"enum",
+						"source"=>$translate_boolean,
                                                 "req_type"=>"st",
                                                 //"width"=>"210px", 
                                                 "title"=>"",
@@ -500,7 +506,7 @@ $vm_columns = array(
                                                 "on_js_event"=>""),
 
 
-*/
+
 
 	//..............................
 	// real fields again..
@@ -515,7 +521,7 @@ $vm_columns = array(
                                                 "unique"=>"false",
                                                 "unique_condition"=>"",
                                                 "visible"=>"true",
-                                                "on_js_event"=>""),   
+                                                "on_js_event"=>"")  
 
 
 
@@ -524,7 +530,7 @@ $vm_columns = array(
 
 				      
 
-//				"html"=>"Cabinetry <input type='textbox' name='se_cabinetry__nc' value=''  />"),
+
 
 
 
@@ -541,39 +547,6 @@ $vm_columns = array(
       $dgrid->setTableEdit($table_name, $primary_key, $condition);
      // $dgrid->setAutoColumnsInEditMode(true);
     
-function set_row_color_for_priority($field_value, $r)
-{
-        global $global_code;
-	$priority = $r[3];
-
-	//echo 'set_row_color_for_priority function got fired; priority='.$priority . '; ind=' . $ind . '; row=' . $r;
-	//echo print_r($r, true);
-	if ($r[3] == 1)
-	{
-		return "<font color=red>". $field_value ."</font>";
-	}
-	else if ($r[3] == 2)
-        {
-		$row_id = $r[0];
-                //echo '<script>document.getElementById("f_row_'.$row_id.'").style.backgroundColor = "#ff0000";</script>'; // red background
-                //echo '<script>document.getElementById("f_row_"+'.$row_id.').style.backgroundColor = "#ff0000";</script>'; // red background
-                //echo 'document.getElementById("f_row_"+'.$row_id.').style.backgroundColor = "#ff0000";'; // red background
-                //echo '<script>document.getElementById("f_row_3").style.backgroundColor="#ff0000";</script>';
-                //echo "<script>var id = ..";       document.getElementById('f_row_'.$row_id).style.backgroundColor="#ff0000";</script>';
-                //echo "<script>document.getElementById('f_row_".$row_id."').style.backgroundColor = '#ff0000';</script>"; // red background
-		return "<font color=orange>". $field_value ."</font>";
-		
-        }
-	else if ($r[3] == 3)
-	{
-		 return "<font color=green>". $field_value ."</font>";
-	}
-	
-        return $field_value;
-
-                //echo '<script>document.getElementById("'.$unique_prefix.'row_"+'.$r.').style.backgroundColor = "#ffff00";</script>'; // yellow background
-}
-//echo 'GLOBAL CODE IS HERE: '. $global_code;
 
 
 // add new row into project_schedule table
@@ -629,7 +602,7 @@ if(($mode == "update") && ($rid == "-1") && $dgrid->IsOperationCompleted()){
    $this_progress_note = $row[3];	
 
    //get the rest of the project data that may have been updated
-   $this_client = isset($_POST['styclient__nc']) ? $_POST['styclient__nc'] : "";                                               	
+   $this_client = isset($_POST['rtyclient__nc']) ? $_POST['rtyclient__nc'] : "";                                               	
    $this_description = isset($_POST['stydescription__nc']) ? $_POST['stydescription__nc'] : "";                                               	
    $this_project_type = isset($_POST['styproject_type__nc']) ? $_POST['styproject_type__nc'] : "";                                               	
    $this_cabinetry = isset($_POST['stycabinetry__nc']) ? $_POST['stycabinetry__nc'] : "";                                               	
@@ -655,12 +628,17 @@ if(($mode == "update") && ($rid == "-1") && $dgrid->IsOperationCompleted()){
 	
    //echo '<br>sql set: '.$sql_set . '<br>';
 
-
-
+   $new_sql_update = 'UPDATE projects ' . $sql_set . ' WHERE project_id = ' . $this_project_id;	
+   //echo 'NEW SQL:' .  $new_sql_update;
+	
    // update the project record
-   $sql_update = "UPDATE projects SET progress_notes = '<b>" .$this_date. ":</b> " .$row[3]. "' WHERE project_id = ".$row[1];  
-   $dSet = $dgrid->ExecuteSql($sql_update);
+   //$sql_update = "UPDATE projects SET progress_notes = '<b>" .$this_date. ":</b> " .$this_progress_note. "' WHERE project_id = ".$this_project_id;  
+   $dSet = $dgrid->ExecuteSql($new_sql_update);
    //echo 'sql_update: '. $sql_update;	
+
+   // refresh the page so the project details/info at the top reflects the new changed values..
+   echo '<meta http-equiv="refresh" content="2;url=http://kedesigns-pm.eweaversolutions.com/?q=node/4&project_id='.$this_project_id.'">';
+
 }
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
