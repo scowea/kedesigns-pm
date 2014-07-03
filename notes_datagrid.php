@@ -5,6 +5,8 @@
     ## +---------------------------------------------------------------------------+
     $global_code = '';
 
+//echo"<h1>PLEASE DO NOT USE THIS SITE, FOR THE NEXT FEW MINUTES. MAJOR LIFTING IS HAPPENING AND MAY INTERFER WITH YOUR DATA ENTRY! <br> THANK YOU SIR.</h1>";
+
 	##  *** only relative (virtual) path (to the current document)
 	//header("Content-type: text/html; charset=ISO-8859-1");
 	  ini_set('allow_call_time_pass_reference', TRUE);
@@ -50,16 +52,37 @@
 $project_sql = "SELECT * FROM projects where project_id = " . $project_id;
 $dSet = $dgrid->ExecuteSql($project_sql);
 
-$row = $dSet->fetchRow(); 
-//***************************************
+$row = $dSet->fetchRow();
 
-       // arrays to build dropdowns or radio buttons.
+//
+
+//echo 'project array: ' . print_r($row,true);
+
+// $row[0] // project_id
+$pre_client = $row[1]; // client
+$pre_status = $row[2];
+$pre_priority = $row[3];
+$pre_project_type = $row[4];
+$pre_description = $row[5];
+$pre_po_url = $row[6];
+$pre_cabinetry = $row[7];
+$pre_progress_notes = $row[8];
+$pre_qb = $row[9];
+$pre_deposit = $row[10];
+$pre_final = $row[11];
+
+//***************************************
+// arrays to build dropdowns or radio buttons.
+
 $translate_boolean = array(0=>"No", 1=>"Yes");
+$cabinetry_field_dropdown_options = array("?"=>"?","CC-C"=>"CC-C","CC-M"=>"CC-M","CC-K"=>"CC-K","CC-N"=>"CC-N","CC-CP"=>"CC-CP","WP"=>"WP","MC"=>"MC","SM"=>"SM");
+$status_field_dropdown_options = array("1"=>"Active", "2"=>"On Order","3"=>"Bid/Estimate", "4"=> "Complete");  /* as "value"=>"option" */
 $priority_field_dropdown_options = array("1"=>"Today's Tasks", "2"=>"Requires Attention", "3"=> "Requires No Attention", "4"=>"Waiting");  /* as "value"=>"option" */
+
 
 //echo print_r($priority_field_dropdown_options, true);
 //echo "<br>";
-//ho "1: " . $priority_field_dropdown_options[1];
+//echo "1: " . $priority_field_dropdown_options[1];
 
 
 function translate_status($status)
@@ -109,22 +132,22 @@ function translate_boolean($yes_no)
 
 //echo 'Project ID: '.$row[0].'<br>';	 
 echo '<h2>Client: '.$row[1].'</h2>';
-echo '[<a href=http://kedesigns-pm.eweaversolutions.com/?q=node/1&f_mode=edit&f_rid='.$project_id.'&project_id='.$project_id.' >Edit Project Details</a>]';
+//echo '[<a href=http://kedesigns-pm.eweaversolutions.com/?q=node/1&f_mode=edit&f_rid='.$project_id.'&project_id='.$project_id.' >Edit Project Details</a>]';
 
 echo '<table>';
-echo '<tr><th width=15%>Description: </th><td>'.$row[5].'</td></tr>';
+echo '<tr><th width=15%>Description: </th><td>'.$pre_description.'</td></tr>';
 
-echo '<tr><th width=15%>Project Type: </th><td>'.$row[4].'</td></tr>';
-echo '<tr><th width=15%>Cabinetry:</th><td> '.$row[7].'</td></tr>';
-echo '<tr><th width=15%>Dropbox URL:</th><td><a target=_blank href="'.$row[6].'"> '.$row[6].'</a></td></tr>';
-echo '<tr><th width=15%>Status:</th><td> '. translate_status($row[2]) .'</td></tr>';
-echo '<tr><th>Priority:</th><td> '. translate_priority($row[3]).'</td></tr>';
+echo '<tr><th width=15%>Project Type: </th><td>'.$pre_project_type.'</td></tr>';
+echo '<tr><th width=15%>Cabinetry:</th><td> '.$pre_cabinetry.'</td></tr>';
+echo '<tr><th width=15%>Dropbox URL:</th><td><a target=_blank href="'.$pre_po_url.'"> '.$pre_po_url.'</a></td></tr>';
+echo '<tr><th width=15%>Status:</th><td> '. translate_status($pre_status) .'</td></tr>';
+echo '<tr><th>Priority:</th><td> '. translate_priority($pre_priority).'</td></tr>';
 
 echo '</table>';
 //echo 'Last Progress Note: '.$row[8].'<br>';
-echo '(QB? '. translate_boolean($row[9]).') ';
-echo '~~ (Deposit? '.translate_boolean($row[10]).') ';
-echo '~~ (Final? '.translate_boolean($row[11]).') ';
+echo '(QB? '. translate_boolean($pre_qb).') ';
+echo '~~ (Deposit? '.translate_boolean($pre_deposit).') ';
+echo '~~ (Final? '.translate_boolean($pre_final).') ';
 echo '<hr>';
 
 echo '<a href=http://kedesigns-pm.eweaversolutions.com/?q=node/1><< Back to Project Dashboard</a>';
@@ -192,18 +215,16 @@ $show_search_type = false;
 	$dgrid->AllowFiltering($filtering_option, $show_search_type);
 	
 	// arrays to build dropdowns or radio buttons.
-	$translate_credit_check_response = array("Approved"=>"Approved", "Declined"=>"Declined", "N/A"=>"N/A");
-	$translate_boolean = array(0=>"No", 1=>"Yes");
-	
-	//..................
-	// this code builds the dependent dropdown country-state
 
-	// create the state filter condition..
+	$translate_boolean = array(0=>"No", 1=>"Yes");
+	$cabinetry_field_dropdown_options = array("?"=>"?","CC-C"=>"CC-C","CC-M"=>"CC-M","CC-K"=>"CC-K","CC-N"=>"CC-N","CC-CP"=>"CC-CP","WP"=>"WP","MC"=>"MC","SM"=>"SM");
+        $status_field_dropdown_options = array("1"=>"Active", "2"=>"On Order","3"=>"Bid/Estimate", "4"=> "Complete");  /* as "value"=>"option" */
+        $priority_field_dropdown_options = array("1"=>"Todays Tasks", "2"=>"Requires Attention", "3"=> "Requires No Attention", "4"=>"Waiting");  /* as "value"=>"option" */
+
 
 	
 	//................................................	
 		
-	//..............
 	
 	$filtering_fields = array(
 	
@@ -302,10 +323,6 @@ $vm_columns = array(
     ## +---------------------------------------------------------------------------+
     ##  ***  set settings for edit/details mode
     
-	##  preedfiled values:	
-	$status_field_dropdown_options = array("Active"=>"Active", "Bid/Estimate"=>"Bid/Estimate", "Complete"=> "Complete");  /* as "value"=>"option" */
-	$priority_field_dropdown_options = array("1"=>"Todays Tasks", "2"=>"Requires Attention", "3"=> "Requires No Attention", "4"=>"Waiting");  /* as "value"=>"option" */
-	$project_id_arr = array($project_id=>$project_id);
 
 	$em_columns = array(																																				
 		"project_id"  =>array("header"=>"Project ID", 
@@ -334,20 +351,183 @@ $vm_columns = array(
                                                 "default"=> date("Y-m-d H:i:s"),
                                                 "on_js_event"=>""),
 						
-    	"note"  =>array("header"=>"Progress Notes", 
-				  		"type"=>"textbox",    
-						"req_type"=>"rt", 
-						"width"=>"100%", 
-						"title"=>"", 
-						"readonly"=>"false", 
-						"maxlength"=>"-1", 
-						"default"=>"", 
-						"unique"=>"false", 
-						"unique_condition"=>"", 
-						"visible"=>"true", 
-						"on_js_event"=>""),												
+	//.................................
+	// virtual fields..					
 
-						
+/*
+   "client__nc"  =>array("header"=>"Client",
+                                                "type"=>"textbox",
+                                                "req_type"=>"rt", 
+                                                //"width"=>"210px", 
+                                                "title"=>"",
+						"default"=>$pre_client, 
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1", 
+                                                "default"=>$pre_client, 
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "on_js_event"=>""),
+                                                                                                                                                              
+        "status__nc"  =>array("header"=>"Status",
+                                                "type"=>"enum",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"", 
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1", 
+                                                "default"=>$pre_status, 
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "source"=>$status_field_dropdown_options,
+                                                "on_js_event"=>""),
+
+
+        "priority__nc"  =>array("header"=>"Priority",
+                                                "type"=>"enum",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"", 
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1", 
+                                                "default"=>$pre_priority, 
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "source"=>$priority_field_dropdown_options,
+                                                "on_js_event"=>""),
+
+   "project_type__nc"  =>array("header"=>"Project Type",
+                                                "type"=>"textbox",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>$pre_project_type,
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "on_js_event"=>""),
+
+                "description__nc"  =>array("header"=>"Description/PO",
+                                                "type"=>"textbox",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>$pre_description,
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "on_js_event"=>""),
+
+        "cabinetry__nc"  =>array("header"=>"Cabinetry",
+
+                                                "source"=>$cabinetry_field_dropdown_options,
+                                                "type"=>"enum",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>$pre_cabinetry,
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "on_js_event"=>""),
+
+        "po_url__nc"  =>array("header"=>"Dropbox URL",
+                                                "type"=>"textbox",
+                                                "req_type"=>"st",
+                                                "width"=>"100%",
+                                                "title"=>"Find this link in Dropbox by selecting Share Link on the appropriate folder",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>$pre_po_url,
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "on_js_event"=>""),                          
+
+        "qb__nc"  =>array("header"=>"QB?",
+                                                "type"=>"checkbox",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>$pre_qb,
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "true_value"=>1,
+                                                "false_value"=>0,
+                                                "on_js_event"=>""),
+
+
+
+        "deposit__nc"  =>array("header"=>"Deposit?",
+                                                "type"=>"checkbox",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>$pre_deposit,
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "true_value"=>1,
+                                                "false_value"=>0,
+                                                "on_js_event"=>""),
+
+        "final__nc"  =>array("header"=>"Final?",
+                                                "type"=>"checkbox",
+                                                "req_type"=>"st",
+                                                //"width"=>"210px", 
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>$pre_final,
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "true_value"=>1,
+                                                "false_value"=>0,
+                                                "on_js_event"=>""),
+
+
+*/
+
+	//..............................
+	// real fields again..
+	"note"  =>array("header"=>"New Progress Note",
+                                                "type"=>"textbox",
+                                                "req_type"=>"rt",
+                                                "width"=>"100%",
+                                                "title"=>"",
+                                                "readonly"=>"false",
+                                                "maxlength"=>"-1",
+                                                "default"=>"",
+                                                "unique"=>"false",
+                                                "unique_condition"=>"",
+                                                "visible"=>"true",
+                                                "on_js_event"=>""),   
+
+
+
+
+
+
+				      
+
+//				"html"=>"Cabinetry <input type='textbox' name='se_cabinetry__nc' value=''  />"),
+
+
+
 	); // end $em_columns = array(
 
 	//$auto_column_in_edit_mode =true;
@@ -428,6 +608,9 @@ $pid = (isset($_REQUEST[$unique_prefix.'pid'])) ? $_REQUEST[$unique_prefix.'pid'
 //echo '<br>today:' . date('m-d-Y');
 //echo '<br>date:' . date('m-d-Y', strtotime($row[2]));
 
+function safe($value){
+   return mysql_real_escape_string($value);
+} 
 
 
 /////////////////////////////////////////////////////
@@ -438,9 +621,41 @@ if(($mode == "update") && ($rid == "-1") && $dgrid->IsOperationCompleted()){
    $sql_select = 'SELECT * from project_notes where note_id = ' . $dgrid->rid;
    $dSet = $dgrid->ExecuteSql($sql_select);
    $row = $dSet->fetchRow();
+  
+   // put the data into temp vars so its not so confusing
+   $this_project_id = $row[1];
+   $this_timestamp = $row[2];
+   $this_date = date('n-j-Y', strtotime($this_timestamp)); // format the timestamp into just a date
+   $this_progress_note = $row[3];	
 
-   // format the datetime:
-   $this_date = date('n-j-Y', strtotime($row[2]));
+   //get the rest of the project data that may have been updated
+   $this_client = isset($_POST['styclient__nc']) ? $_POST['styclient__nc'] : "";                                               	
+   $this_description = isset($_POST['stydescription__nc']) ? $_POST['stydescription__nc'] : "";                                               	
+   $this_project_type = isset($_POST['styproject_type__nc']) ? $_POST['styproject_type__nc'] : "";                                               	
+   $this_cabinetry = isset($_POST['stycabinetry__nc']) ? $_POST['stycabinetry__nc'] : "";                                               	
+   $this_po_url = isset($_POST['stypo_url__nc']) ? $_POST['stypo_url__nc'] : "";                                               	
+   $this_status = isset($_POST['stystatus__nc']) ? $_POST['stystatus__nc'] : "";                                               	
+   $this_priority = isset($_POST['stypriority__nc']) ? $_POST['stypriority__nc'] : "";                                               	
+   $this_qb = isset($_POST['styqb__nc']) ? $_POST['styqb__nc'] : "";                                               	
+   $this_deposit = isset($_POST['stydeposit__nc']) ? $_POST['stydeposit__nc'] : "";                                               	
+   $this_final = isset($_POST['styfinal__nc']) ? $_POST['styfinal__nc'] : "";                                               	
+   
+   // build the sql...
+   $sql_set  = " SET progress_notes = '<b>"	.safe($this_date).":</b> ".safe($this_progress_note)."', ";	
+   $sql_set .= "client = '"			.safe($this_client)		."', ";
+   $sql_set .= "description = '"		.safe($this_description)	."', ";
+   $sql_set .= "project_type = '"		.safe($this_project_type)	."', ";
+   $sql_set .= "cabinetry = '"			.safe($this_cabinetry)		."', ";
+   $sql_set .= "po_url = '"			.safe($this_po_url)		."', ";
+   $sql_set .= "status = '"			.safe($this_status)		."', ";
+   $sql_set .= "priority = '"			.safe($this_priority)		."', ";
+   $sql_set .= "qb = '"				.safe($this_qb)			."', ";
+   $sql_set .= "deposit = '"			.safe($this_deposit)		."', ";
+   $sql_set .= "final = '"			.safe($this_final)		."' "; // no comma on the last one
+	
+   //echo '<br>sql set: '.$sql_set . '<br>';
+
+
 
    // update the project record
    $sql_update = "UPDATE projects SET progress_notes = '<b>" .$this_date. ":</b> " .$row[3]. "' WHERE project_id = ".$row[1];  
